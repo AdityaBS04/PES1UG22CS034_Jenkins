@@ -1,37 +1,33 @@
 pipeline {
-  agent {
-    docker {
-      image 'maven:3.8.6-jdk-11'
-    }
-  }
-  stages {
-    stage('Build') {
-      steps {
-        sh 'mvn clean install'
-        echo 'Build Stage Successful'
-      }
-    }
-    stage('Test') {
-      steps {
-        sh 'mvn test'
-        echo 'Test Stage Successful'
-      }
-      post {
-        always {
-          junit 'target/surefire-reports/*.xml'
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    sh 'g++ -o output hello.cpp'
+                }
+            }
         }
-      }
+
+        stage('Test') {
+            steps {
+                script {
+                    sh './output'  // Run the compiled binary
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+            }
+        }
     }
-    stage('Deploy') {
-      steps {
-        sh 'mvn deploy'
-        echo 'Deployment Successful'
-      }
+
+    post {
+        failure {
+            echo 'Pipeline failed'
+        }
     }
-  }
-  post {
-    failure {
-      echo 'Pipeline failed'
-    }
-  }
 }
